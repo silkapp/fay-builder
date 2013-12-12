@@ -57,9 +57,6 @@ listField key = fmap (map strip . splitOn ",") . field key
 listField_ :: String -> PackageDescription -> [String]
 listField_ = fromMaybe [] .: listField
 
-(.:) :: (c -> d) -> (a -> b -> c) -> a -> b -> d
-(.:) = (.).(.)
-
 field :: String -> PackageDescription -> Maybe String
 field key = fmap strip . lookup key . customFieldsPD
 
@@ -74,9 +71,6 @@ fayConfig pkgDb packages dir includePs =
         , Fay.configPrettyPrint = True
         , Fay.configPackageConf = pkgDb
         }
-
-strip :: String -> String
-strip = T.unpack . T.strip . T.pack
 
 defaultFayHook :: IO ()
 defaultFayHook = defaultMainWithHooks simpleUserHooks { postBuild = postBuildHook }
@@ -93,3 +87,9 @@ postBuildHook _ _ packageDesc localBuildInfo = do
           SpecificPackageDB{} -> True
           _                   -> False)
       . withPackageDB
+
+strip :: String -> String
+strip = T.unpack . T.strip . T.pack
+
+(.:) :: (c -> d) -> (a -> b -> c) -> a -> b -> d
+(.:) = (.).(.)
