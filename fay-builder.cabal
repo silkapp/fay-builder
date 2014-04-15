@@ -1,6 +1,7 @@
 name:                fay-builder
 version:             0.1.0.5
 synopsis:            Compile Fay code on cabal install, and ad-hoc recompile during development
+description:         Compile Fay code on cabal install, and ad-hoc recompile during development
 license:             OtherLicense
 author:              Silk B.V.
 bug-reports:         https://github.com/silkapp/fay-builder/issues
