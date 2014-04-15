@@ -28,10 +28,11 @@ import Fay.Compiler.Config
 import qualified Distribution.PackageDescription.Parse as PD (readPackageDescription)
 import qualified Distribution.Verbosity                as Verbosity
 
-
+-- | Default parsing of a Cabal file.
 readPackageDescription :: FilePath -> IO PackageDescription
 readPackageDescription = PD.readPackageDescription Verbosity.silent >=> return . packageDescription
 
+-- | Compile code
 build :: PackageDescription -> Maybe FilePath -> IO ()
 build packageDesc pkgDb = do
   let packages     = listField_ "x-fay-packages"      packageDesc
@@ -51,18 +52,23 @@ build packageDesc pkgDb = do
       else
         error $ "fay-builder: Could not find " ++ candidate
 
+-- | Try to read a comma separated field
 listField :: String -> PackageDescription -> Maybe [String]
 listField key = fmap (map strip . splitOn ",") . field key
 
+-- | Read the value of a comma separated field, gives an empty list if the field is not present.
 listField_ :: String -> PackageDescription -> [String]
-listField_ = fromMaybe [] .: listField
+listField_ fn = fromMaybe [] . listField fn
 
+-- | Tyr to read a field's value
 field :: String -> PackageDescription -> Maybe String
 field key = fmap strip . lookup key . customFieldsPD
 
+-- | Force reading of a field, fails if it doesn't exist
 field_ :: String -> PackageDescription -> String
 field_ key = fromMaybe (error $ key ++ "is  missing") . field key
 
+-- | Default config, TODO make this optional
 fayConfig :: Maybe FilePath -> [String] -> FilePath -> [FilePath] -> CompileConfig
 fayConfig pkgDb packages dir includePs =
     addConfigDirectoryIncludePaths (dir : includePs)
@@ -72,9 +78,11 @@ fayConfig pkgDb packages dir includePs =
         , Fay.configPackageConf = pkgDb
         }
 
+-- | Default build hook for your Setup.hs
 defaultFayHook :: IO ()
 defaultFayHook = defaultMainWithHooks simpleUserHooks { postBuild = postBuildHook }
 
+-- | Default post build hook for your Setup.hs
 postBuildHook :: Args -> BuildFlags -> PackageDescription -> LocalBuildInfo -> IO ()
 postBuildHook _ _ packageDesc localBuildInfo = do
   putStrLn "Building Fay client ..."
@@ -88,8 +96,6 @@ postBuildHook _ _ packageDesc localBuildInfo = do
           _                   -> False)
       . withPackageDB
 
+-- | Strip leading and trailing whitespace
 strip :: String -> String
 strip = T.unpack . T.strip . T.pack
-
-(.:) :: (c -> d) -> (a -> b -> c) -> a -> b -> d
-(.:) = (.).(.)
