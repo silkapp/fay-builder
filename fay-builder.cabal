@@ -19,7 +19,7 @@ library
   hs-source-dirs:    src
   exposed-modules:   Fay.Builder
   build-depends:
-      base >= 4 && < 5
+      base >= 4.5 && < 4.8
     , Cabal >= 1.4 && < 1.19
     , data-default >= 0.5.3 && < 0.6
     , directory >= 1.1 && < 1.3
