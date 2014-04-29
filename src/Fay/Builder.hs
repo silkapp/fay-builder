@@ -24,7 +24,6 @@ import Distribution.Simple
 import Distribution.Simple.LocalBuildInfo
 import Distribution.Simple.Setup
 import Fay
-import Fay.Compiler.Config
 import qualified Distribution.PackageDescription.Parse as PD (readPackageDescription)
 import qualified Distribution.Verbosity                as Verbosity
 
@@ -69,13 +68,13 @@ field_ :: String -> PackageDescription -> String
 field_ key = fromMaybe (error $ key ++ "is  missing") . field key
 
 -- | Default config, TODO make this optional
-fayConfig :: Maybe FilePath -> [String] -> FilePath -> [FilePath] -> CompileConfig
+fayConfig :: Maybe FilePath -> [String] -> FilePath -> [FilePath] -> Config
 fayConfig pkgDb packages dir includePs =
     addConfigDirectoryIncludePaths (dir : includePs)
   . addConfigPackages              packages
-  $ def { Fay.configWall        = True
-        , Fay.configPrettyPrint = True
-        , Fay.configPackageConf = pkgDb
+  $ def { configWall        = True
+        , configPrettyPrint = True
+        , configPackageConf = pkgDb
         }
 
 -- | Default build hook for your Setup.hs
