@@ -6,7 +6,7 @@ For an introduction please see the post on the [Silk Engineering blog](http://en
 
 ## Installation
 
-fay-builder available on [Hackage](http://hackage.haskell.org/package/fay-builder), to install it:
+fay-builder is available on [Hackage](http://hackage.haskell.org/package/fay-builder), to install it:
 
 ```shell
 cabal install fay-builder
