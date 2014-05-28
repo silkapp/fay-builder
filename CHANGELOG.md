@@ -8,6 +8,7 @@
   called.
 * Export new `readField` function.
 * Signature for `fayConfig` has changed.
+* Clarify license as BSD3.
 
 #### 0.1.0.7 (2014-04-29)
 
