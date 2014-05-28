@@ -5,6 +5,7 @@ module Fay.Builder
  , listField_
  , field
  , field_
+ , readField
  , fayConfig
  , defaultFayHook
  , postBuildHook
@@ -24,6 +25,7 @@ import Distribution.Simple
 import Distribution.Simple.LocalBuildInfo
 import Distribution.Simple.Setup
 import Fay
+import Safe
 import qualified Distribution.PackageDescription.Parse as PD (readPackageDescription)
 import qualified Distribution.Verbosity                as Verbosity
 
@@ -34,11 +36,13 @@ readPackageDescription = PD.readPackageDescription Verbosity.silent >=> return .
 -- | Compile code
 build :: PackageDescription -> Maybe FilePath -> IO ()
 build packageDesc pkgDb = do
-  let packages     = listField_ "x-fay-packages"      packageDesc
-      roots        = listField_ "x-fay-root-modules"  packageDesc
-      includePaths = listField_ "x-fay-include-paths" packageDesc
-      sourceDir    = field_     "x-fay-source-dir"    packageDesc
-      outputDir    = field_     "x-fay-output-dir"    packageDesc
+  let packages     = listField_ "x-fay-packages"       packageDesc
+      roots        = listField_ "x-fay-root-modules"   packageDesc
+      includePaths = listField_ "x-fay-include-paths"  packageDesc
+      sourceDir    = field_     "x-fay-source-dir"     packageDesc
+      outputDir    = field_     "x-fay-output-dir"     packageDesc
+      stricts      = listField_ "x-fay-strict-modules" packageDesc
+      lib          = readField  "x-fay-library" False  packageDesc
 
   forM_ (zip roots [(1::Int)..]) $ \(name, i) -> do
     let candidate = sourceDir </> name <.> "hs"
@@ -47,7 +51,7 @@ build packageDesc pkgDb = do
     if exists
       then do
         putStrLn $ "fay: [" ++ show i ++ " of " ++ show (length roots) ++ "] Compiling " ++ name ++ " ( " ++ candidate ++ ", " ++ out ++ " )"
-        compileFromTo (fayConfig pkgDb packages sourceDir includePaths) candidate (Just out)
+        compileFromTo (fayConfig pkgDb packages sourceDir includePaths stricts lib) candidate (Just out)
       else
         error $ "fay-builder: Could not find " ++ candidate
 
@@ -59,7 +63,7 @@ listField key = fmap (map strip . splitOn ",") . field key
 listField_ :: String -> PackageDescription -> [String]
 listField_ fn = fromMaybe [] . listField fn
 
--- | Tyr to read a field's value
+-- | Try to read a field's value
 field :: String -> PackageDescription -> Maybe String
 field key = fmap strip . lookup key . customFieldsPD
 
@@ -67,14 +71,19 @@ field key = fmap strip . lookup key . customFieldsPD
 field_ :: String -> PackageDescription -> String
 field_ key = fromMaybe (error $ key ++ "is  missing") . field key
 
+readField :: Read a => String -> a -> PackageDescription -> a
+readField key d = fromMaybe d . (readMay <=< field key)
+
 -- | Default config, TODO make this optional
-fayConfig :: Maybe FilePath -> [String] -> FilePath -> [FilePath] -> Config
-fayConfig pkgDb packages dir includePs =
+fayConfig :: Maybe FilePath -> [String] -> FilePath -> [FilePath] -> [String] -> Bool -> Config
+fayConfig pkgDb packages dir includePs stricts lib =
     addConfigDirectoryIncludePaths (dir : includePs)
   . addConfigPackages              packages
   $ def { configWall        = True
         , configPrettyPrint = True
         , configPackageConf = pkgDb
+        , configStrict      = stricts
+        , configLibrary     = lib
         }
 
 -- | Default build hook for your Setup.hs
