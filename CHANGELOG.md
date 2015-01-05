@@ -1,5 +1,9 @@
 # Changelog
 
+#### 0.2.0.2
+
+* Allow `fay 0.22.*`.
+
 #### 0.2.0.1
 
 * Allow `fay 0.21`
