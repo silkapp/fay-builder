@@ -1,5 +1,9 @@
 # Changelog
 
+#### 0.2.0.4
+
+* Allow `base 4.8.*` and `filepath 1.4.*`
+
 #### 0.2.0.3
 
 * Allow `fay 0.23.*`.
