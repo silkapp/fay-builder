@@ -1,5 +1,9 @@
 # Changelog
 
+#### 0.2.0.5
+
+* Allow `Cabal < 1.24`
+
 #### 0.2.0.4
 
 * Allow `base 4.8.*` and `filepath 1.4.*`
